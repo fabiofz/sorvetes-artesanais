@@ -1,0 +1,9 @@
+fastapi>=0.121,<1
+uvicorn>=0.30,<1
+SQLAlchemy>=2.0,<2.2
+PyMySQL[rsa]>=1.1,<2
+PyJWT>=2.10,<3
+pwdlib[argon2]>=0.2,<1
+pydantic-settings>=2.6,<3
+python-multipart>=0.0.20,<1
+tzdata>=2025.1; sys_platform == "win32"
