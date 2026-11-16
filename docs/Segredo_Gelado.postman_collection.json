@@ -1,0 +1,954 @@
+{
+  "info": {
+    "name": "Segredo Gelado - fluxo demonstrativo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Execute em ordem em um banco de demonstração. Requer init-db, seed-demo e administrador criado. Só contém dados fictícios; pagamentos e estornos são mock."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "username",
+      "value": ""
+    },
+    {
+      "key": "password",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Login administrador",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/auth/token",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "{{username}}",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "{{password}}",
+              "type": "text"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set(\"token\", pm.response.json().access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Consultar opções de venda",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/catalog/offers"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const x=pm.response.json().find(x=>x.balls===3); pm.expect(x).to.exist; pm.collectionVariables.set(\"offerId\",x.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Consultar sabores e embalagens",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/inventory?limit=100"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const a=pm.response.json(); for (const [n,k] of [[\"Chocolate\",\"chocolateId\"],[\"Morango\",\"morangoId\"],[\"Caixinha\",\"packageId\"]]) { const x=a.find(x=>x.name===n); pm.expect(x).to.exist; pm.collectionVariables.set(k,x.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Entrada demonstrativa de estoque",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inventory/{{chocolateId}}/adjustments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 1000,\n  \"reason\": \"Demonstração Postman\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Entrada demonstrativa de estoque",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inventory/{{morangoId}}/adjustments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 1000,\n  \"reason\": \"Demonstração Postman\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Entrada demonstrativa de estoque",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inventory/{{packageId}}/adjustments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 20,\n  \"reason\": \"Demonstração Postman\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Criar pedido direto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"canalPedido\": \"WHATSAPP\",\n  \"external_id\": \"{{externalId}}\",\n  \"customer_name\": \"Cliente fictício\",\n  \"customer_contact\": \"000000000\",\n  \"address\": \"Rua demonstrativa, 10\",\n  \"payment_method\": \"PIX\",\n  \"already_paid\": false,\n  \"items\": [\n    {\n      \"offer_id\": \"{{offerId}}\",\n      \"quantity\": 1,\n      \"flavors\": [\n        {\n          \"inventory_id\": \"{{chocolateId}}\",\n          \"balls\": 2\n        },\n        {\n          \"inventory_id\": \"{{morangoId}}\",\n          \"balls\": 1\n        }\n      ],\n      \"packages\": [\n        {\n          \"inventory_id\": \"{{packageId}}\",\n          \"quantity\": 1\n        }\n      ]\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"externalId\",pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"orderId\",pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Repetir pedido sem duplicar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"canalPedido\": \"WHATSAPP\",\n  \"external_id\": \"{{externalId}}\",\n  \"customer_name\": \"Cliente fictício\",\n  \"customer_contact\": \"000000000\",\n  \"address\": \"Rua demonstrativa, 10\",\n  \"payment_method\": \"PIX\",\n  \"already_paid\": false,\n  \"items\": [\n    {\n      \"offer_id\": \"{{offerId}}\",\n      \"quantity\": 1,\n      \"flavors\": [\n        {\n          \"inventory_id\": \"{{chocolateId}}\",\n          \"balls\": 2\n        },\n        {\n          \"inventory_id\": \"{{morangoId}}\",\n          \"balls\": 1\n        }\n      ],\n      \"packages\": [\n        {\n          \"inventory_id\": \"{{packageId}}\",\n          \"quantity\": 1\n        }\n      ]\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"orderId\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Pagamento mock negado",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders/{{orderId}}/payment/mock",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approved\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json().approved).to.eql(false); pm.expect(pm.response.json().order.financial_status).to.eql(\"PENDENTE\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Pagamento mock aprovado",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders/{{orderId}}/payment/mock",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approved\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json().order.financial_status).to.eql(\"PAGO\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Repetir confirmação sem nova baixa",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders/{{orderId}}/payment/mock",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approved\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Atualizar preparação",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders/{{orderId}}/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"EM_PREPARACAO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 - Atualizar preparação",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders/{{orderId}}/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"PRONTO_PARA_ENTREGA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 - Consultar por canal",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/orders?canalPedido=WHATSAPP"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json().every(x=>x.canalPedido===\"WHATSAPP\")).to.eql(true);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 - Sem autenticação",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/orders",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 - Rejeitar pedido sem canal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"external_id\": \"{{externalId}}\",\n  \"customer_name\": \"Cliente fictício\",\n  \"customer_contact\": \"000000000\",\n  \"address\": \"Rua demonstrativa, 10\",\n  \"payment_method\": \"PIX\",\n  \"already_paid\": false,\n  \"items\": [\n    {\n      \"offer_id\": \"{{offerId}}\",\n      \"quantity\": 1,\n      \"flavors\": [\n        {\n          \"inventory_id\": \"{{chocolateId}}\",\n          \"balls\": 2\n        },\n        {\n          \"inventory_id\": \"{{morangoId}}\",\n          \"balls\": 1\n        }\n      ],\n      \"packages\": [\n        {\n          \"inventory_id\": \"{{packageId}}\",\n          \"quantity\": 1\n        }\n      ]\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 - Bloquear transição inválida",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders/{{orderId}}/status",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"EM_PREPARACAO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18 - Rejeitar identificador inexistente",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/orders/2147483647"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19 - Criar entregador demonstrativo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{driverUsername}}\",\n  \"name\": \"Entregador demonstrativo\",\n  \"password\": \"{{driverPassword}}\",\n  \"role\": \"ENTREGADOR\",\n  \"relief\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"driverUsername\",\"demo_\"+Date.now()); pm.collectionVariables.set(\"driverPassword\",pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"driverId\",pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20 - Login entregador",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/auth/token",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "{{driverUsername}}",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "{{driverPassword}}",
+              "type": "text"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set(\"driverToken\",pm.response.json().access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21 - Entregador sem permissão administrativa",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/inventory",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{driverToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Não permitido\",\n  \"category\": \"SORVETE\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22 - Escalar entregador para hoje",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/shifts",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"driver_id\": \"{{driverId}}\",\n  \"day\": \"{{today}}\",\n  \"working\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const a=new Intl.DateTimeFormat(\"en-US\",{timeZone:\"America/Sao_Paulo\",year:\"numeric\",month:\"2-digit\",day:\"2-digit\"}).formatToParts(new Date()); const g=t=>a.find(x=>x.type===t).value; pm.collectionVariables.set(\"today\",`${g(\"year\")}-${g(\"month\")}-${g(\"day\")}`);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "23 - Atribuir entrega",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders/{{orderId}}/delivery",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"driver_id\": \"{{driverId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"deliveryId\",pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "24 - Preciso de ajuda por acidente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/deliveries/{{deliveryId}}/help",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{driverToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"kind\": \"ACIDENTE\",\n  \"description\": \"Ocorrência fictícia para teste\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "25 - Ausente e estorno mock",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/deliveries/{{deliveryId}}/result",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{driverToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"result\": \"AUSENTE\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json().financial_status).to.eql(\"ESTORNADO\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "26 - Consultar retorno pendente",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/donations/items?limit=100"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const x=pm.response.json().find(x=>x.order_id===Number(pm.collectionVariables.get(\"orderId\"))); pm.expect(x.status).to.eql(\"AGUARDANDO_RETORNO\"); pm.collectionVariables.set(\"donationItemId\",x.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "27 - Conferir retorno físico",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/donations/items/{{donationItemId}}/return",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"suitable\": true,\n  \"condition\": \"Retorno demonstrativo conferido\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "28 - Registrar doação",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/donations",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"item_ids\": [\n    \"{{donationItemId}}\"\n  ],\n  \"destination\": \"Ação social demonstrativa\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
