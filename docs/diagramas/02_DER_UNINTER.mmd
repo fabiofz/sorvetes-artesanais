@@ -1,0 +1,145 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial", "primaryColor": "#FFFFFF", "primaryTextColor": "#123062", "primaryBorderColor": "#123062", "lineColor": "#123062", "secondaryColor": "#FFF5D6", "secondaryTextColor": "#123062", "secondaryBorderColor": "#FFB90A", "tertiaryColor": "#F0F4FA", "tertiaryTextColor": "#123062", "tertiaryBorderColor": "#123062", "clusterBkg": "#F0F4FA", "clusterBorder": "#123062", "edgeLabelBackground": "#FFFFFF", "actorBkg": "#FFF5D6", "actorBorder": "#FFB90A", "actorTextColor": "#123062", "labelColor": "#123062", "relationColor": "#123062", "relationLabelColor": "#123062"}}}%%
+erDiagram
+USUARIO ||--o| ENTREGADOR : possui
+ENTREGADOR ||--o{ ESCALA : cumpre
+ENTREGADOR ||--o{ ENTREGA : realiza
+CLIENTE ||--o{ PEDIDO : faz
+CANAL_VENDA ||--o{ PEDIDO : origina
+PEDIDO ||--|{ ITEM_PEDIDO : contem
+ITEM_PEDIDO ||--|{ SABOR_ITEM : distribui
+ITEM_ESTOQUE ||--o{ SABOR_ITEM : identifica_sabor
+ITEM_PEDIDO ||--o{ CONSUMO_EMBALAGEM : utiliza
+ITEM_ESTOQUE ||--o{ CONSUMO_EMBALAGEM : identifica_embalagem
+ITEM_ESTOQUE ||--o{ MOVIMENTACAO_ESTOQUE : possui
+PEDIDO o|--o{ MOVIMENTACAO_ESTOQUE : gera
+PEDIDO ||--|| PAGAMENTO : possui
+PAGAMENTO ||--o| ESTORNO : recebe
+PEDIDO ||--o| ENTREGA : possui
+ENTREGA ||--o{ OCORRENCIA : registra
+PEDIDO ||--o{ ITEM_DOACAO : origina
+DOACAO o|--|{ ITEM_DOACAO : agrupa
+USUARIO ||--o{ DOACAO : registra
+USUARIO {
+int id PK
+string nome
+string credencial_hash
+string perfis
+string ativo
+}
+ENTREGADOR {
+int id PK
+int usuario_id FK
+string folguista
+}
+ESCALA {
+int id PK
+int entregador_id FK
+string data
+string inicio
+string fim
+string situacao
+}
+CLIENTE {
+int id PK
+string nome
+string contato
+}
+CANAL_VENDA {
+int id PK
+string nome
+string integracao_ativa
+}
+PEDIDO {
+int id PK
+int cliente_id FK
+int canal_id FK
+string codigo_externo
+string criado_em
+string endereco_entrega
+decimal valor_total
+string status_operacional
+}
+ITEM_PEDIDO {
+int id PK
+int pedido_id FK
+int bolas_por_porcao
+int quantidade_porcoes
+decimal preco_unitario
+}
+SABOR_ITEM {
+int id PK
+int item_pedido_id FK
+int item_estoque_id FK
+int quantidade_bolas_por_porcao
+}
+ITEM_ESTOQUE {
+int id PK
+string descricao
+string categoria
+string unidade_medida
+decimal saldo
+}
+CONSUMO_EMBALAGEM {
+int id PK
+int item_pedido_id FK
+int item_estoque_id FK
+decimal quantidade
+}
+MOVIMENTACAO_ESTOQUE {
+int id PK
+int item_estoque_id FK
+int pedido_id FK
+string tipo
+decimal quantidade
+string registrado_em
+string motivo
+}
+PAGAMENTO {
+int id PK
+int pedido_id FK
+decimal valor
+string meio
+string processador
+string status_financeiro
+string referencia_externa
+}
+ESTORNO {
+int id PK
+int pagamento_id FK
+decimal valor
+string referencia_externa
+string confirmado_em
+}
+ENTREGA {
+int id PK
+int pedido_id FK
+int entregador_id FK
+string resultado
+string saida_em
+string encerrada_em
+}
+OCORRENCIA {
+int id PK
+int entrega_id FK
+string tipo
+string descricao
+string situacao
+string registrada_em
+}
+ITEM_DOACAO {
+int id PK
+int pedido_id FK
+int doacao_id FK
+string descricao_produto
+decimal quantidade
+string unidade_medida
+string retorno_confirmado_em
+string condicao
+string situacao
+}
+DOACAO {
+int id PK
+string realizada_em
+int responsavel_id FK
+string destino
+}

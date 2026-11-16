@@ -1,0 +1,67 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial", "primaryColor": "#FFFFFF", "primaryTextColor": "#123062", "primaryBorderColor": "#123062", "lineColor": "#123062", "secondaryColor": "#FFF5D6", "secondaryTextColor": "#123062", "secondaryBorderColor": "#FFB90A", "tertiaryColor": "#F0F4FA", "tertiaryTextColor": "#123062", "tertiaryBorderColor": "#123062", "clusterBkg": "#F0F4FA", "clusterBorder": "#123062", "edgeLabelBackground": "#FFFFFF", "actorBkg": "#FFF5D6", "actorBorder": "#FFB90A", "actorTextColor": "#123062", "labelColor": "#123062", "relationColor": "#123062", "relationLabelColor": "#123062"}}}%%
+classDiagram
+class Pedido {
++calcularTotal()
++iniciarPreparo()
++marcarPronto()
+}
+class ItemPedido {
++calcularConsumoPorSabor()
+}
+class Pagamento {
++confirmarPagamento()
++registrarEstornoConfirmado()
+}
+class Entrega {
++registrarSaida()
++concluir()
++registrarInsucesso()
+}
+class Ocorrencia {
++registrar()
++encerrar()
+}
+class ItemEstoque {
++registrarEntrada()
++registrarBaixa()
++ajustarSaldo()
+}
+class ItemDoacao {
++confirmarRetorno()
++registrarDestinacao()
+}
+class ServicoPedidos {
++receberPedido()
++verificarDuplicidade()
+}
+class ServicoPagamentos {
++confirmarPagamento()
++executarEstornoIntegral()
+}
+class ServicoEstoque {
++baixarPedidoPago()
++impedirBaixaDuplicada()
+}
+class ServicoEntregas {
++atribuirEntregador()
++registrarResultado()
++acionarAjuda()
+}
+class ServicoDoacoes {
++registrarRetorno()
++registrarDoacao()
+}
+Pedido "1" *-- "1..*" ItemPedido
+Pedido "1" -- "1" Pagamento
+Pedido "1" -- "0..1" Entrega
+Entrega "1" -- "0..*" Ocorrencia
+Pedido "1" -- "0..*" ItemDoacao
+ServicoPedidos ..> Pedido
+ServicoPagamentos ..> Pagamento
+ServicoPagamentos ..> ServicoEstoque : pagamento confirmado
+ServicoEstoque ..> ItemEstoque
+ServicoEstoque ..> ItemPedido
+ServicoEntregas ..> Entrega
+ServicoEntregas ..> Ocorrencia
+ServicoEntregas ..> ServicoPagamentos : entrega sem sucesso
+ServicoDoacoes ..> ItemDoacao

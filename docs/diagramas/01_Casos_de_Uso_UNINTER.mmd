@@ -1,0 +1,41 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial", "primaryColor": "#FFFFFF", "primaryTextColor": "#123062", "primaryBorderColor": "#123062", "lineColor": "#123062", "secondaryColor": "#FFF5D6", "secondaryTextColor": "#123062", "secondaryBorderColor": "#FFB90A", "tertiaryColor": "#F0F4FA", "tertiaryTextColor": "#123062", "tertiaryBorderColor": "#123062", "clusterBkg": "#F0F4FA", "clusterBorder": "#123062", "edgeLabelBackground": "#FFFFFF", "actorBkg": "#FFF5D6", "actorBorder": "#FFB90A", "actorTextColor": "#123062", "labelColor": "#123062", "relationColor": "#123062", "relationLabelColor": "#123062"}}}%%
+flowchart LR
+ A[Administrador]
+ AT[Atendente]
+ PR[Produção]
+ E[Entregador]
+ PL[Plataformas externas]
+ PG[Meios de pagamento]
+ subgraph SG[Sistema Segredo Gelado]
+ U1([Gerenciar usuários e escala])
+ U2([Gerenciar produtos e estoque])
+ U3([Configurar integrações])
+ U4([Receber e consultar pedidos])
+ U5([Confirmar pagamentos diretos])
+ U6([Atualizar preparação])
+ U7([Atribuir entregador])
+ U8([Registrar resultado da entrega])
+ U9([Pedir ajuda: contestação ou acidente])
+ U10([Executar estorno])
+ U11([Confirmar retorno e registrar doações])
+ U12([Consultar perdas e relatórios])
+ end
+ A --- U1
+ A --- U2
+ A --- U3
+ A --- U12
+ AT --- U4
+ AT --- U5
+ AT --- U7
+ AT --- U9
+ AT --- U11
+ PR --- U6
+ E --- U8
+ E --- U9
+ PL --- U4
+ PG --- U5
+ PG --- U10
+ PL --- U10
+ U8 -. Ausente ou Não entregue .-> U10
+ classDef actor fill:#FFF5D6,stroke:#FFB90A,color:#123062,stroke-width:2px;
+ class A,AT,PR,E,PL,PG actor;
