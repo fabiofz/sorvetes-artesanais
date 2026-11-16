@@ -1,0 +1,480 @@
+{
+  "scenario": "Pedido iFood fictício, cliente ausente, estorno mock e doação",
+  "executed_at": "2026-11-16T01:15:25.252384-03:00",
+  "database": "SQLite em memória",
+  "external_integrations": "mock",
+  "real_money_moved": false,
+  "steps": [
+    {
+      "name": "Login JWT dos usuários fictícios",
+      "http_status": 200,
+      "result": "Administrador e entregador autenticados. Tokens omitidos."
+    },
+    {
+      "name": "Receber pedido iFood fictício já pago",
+      "method": "POST",
+      "route": "/orders",
+      "http_status": 201,
+      "request": {
+        "canalPedido": "IFOOD",
+        "external_id": "demo-d4cf29f0246940d8b11837674f6a3cb6",
+        "customer_name": "Cliente fictício",
+        "customer_contact": "000000000",
+        "address": "Rua demonstrativa, 10",
+        "payment_method": "PLATAFORMA",
+        "already_paid": true,
+        "items": [
+          {
+            "offer_id": 1,
+            "quantity": 1,
+            "flavors": [
+              {
+                "inventory_id": 1,
+                "balls": 2
+              },
+              {
+                "inventory_id": 2,
+                "balls": 1
+              }
+            ],
+            "packages": [
+              {
+                "inventory_id": 3,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      },
+      "response": {
+        "id": 1,
+        "canalPedido": "IFOOD",
+        "external_id": "demo-d4cf29f0246940d8b11837674f6a3cb6",
+        "status": "RECEBIDO",
+        "financial_status": "PAGO",
+        "total": "20.00",
+        "created_at": "2026-11-16T04:15:25.720951",
+        "items": [
+          {
+            "id": 1,
+            "balls": 3,
+            "quantity": 1,
+            "unit_price": "20.00",
+            "flavors": [
+              {
+                "inventory_id": 1,
+                "balls": 2
+              },
+              {
+                "inventory_id": 2,
+                "balls": 1
+              }
+            ],
+            "packages": [
+              {
+                "inventory_id": 3,
+                "quantity": 1
+              }
+            ]
+          }
+        ],
+        "customer": {
+          "name": "Cliente fictício",
+          "contact": "000000000"
+        },
+        "address": "Rua demonstrativa, 10"
+      }
+    },
+    {
+      "name": "Reenviar pedido sem duplicar",
+      "method": "POST",
+      "route": "/orders",
+      "http_status": 200,
+      "request": {
+        "canalPedido": "IFOOD",
+        "external_id": "demo-d4cf29f0246940d8b11837674f6a3cb6",
+        "customer_name": "Cliente fictício",
+        "customer_contact": "000000000",
+        "address": "Rua demonstrativa, 10",
+        "payment_method": "PLATAFORMA",
+        "already_paid": true,
+        "items": [
+          {
+            "offer_id": 1,
+            "quantity": 1,
+            "flavors": [
+              {
+                "inventory_id": 1,
+                "balls": 2
+              },
+              {
+                "inventory_id": 2,
+                "balls": 1
+              }
+            ],
+            "packages": [
+              {
+                "inventory_id": 3,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      },
+      "response": {
+        "id": 1,
+        "canalPedido": "IFOOD",
+        "external_id": "demo-d4cf29f0246940d8b11837674f6a3cb6",
+        "status": "RECEBIDO",
+        "financial_status": "PAGO",
+        "total": "20.00",
+        "created_at": "2026-11-16T04:15:25.720951",
+        "items": [
+          {
+            "id": 1,
+            "balls": 3,
+            "quantity": 1,
+            "unit_price": "20.00",
+            "flavors": [
+              {
+                "inventory_id": 1,
+                "balls": 2
+              },
+              {
+                "inventory_id": 2,
+                "balls": 1
+              }
+            ],
+            "packages": [
+              {
+                "inventory_id": 3,
+                "quantity": 1
+              }
+            ]
+          }
+        ],
+        "customer": {
+          "name": "Cliente fictício",
+          "contact": "000000000"
+        },
+        "address": "Rua demonstrativa, 10"
+      }
+    },
+    {
+      "name": "Atualizar para EM_PREPARACAO",
+      "method": "PATCH",
+      "route": "/orders/1/status",
+      "http_status": 200,
+      "request": {
+        "status": "EM_PREPARACAO"
+      },
+      "response": {
+        "id": 1,
+        "canalPedido": "IFOOD",
+        "external_id": "demo-d4cf29f0246940d8b11837674f6a3cb6",
+        "status": "EM_PREPARACAO",
+        "financial_status": "PAGO",
+        "total": "20.00",
+        "created_at": "2026-11-16T04:15:25.720951",
+        "items": [
+          {
+            "id": 1,
+            "balls": 3,
+            "quantity": 1,
+            "unit_price": "20.00",
+            "flavors": [
+              {
+                "inventory_id": 1,
+                "balls": 2
+              },
+              {
+                "inventory_id": 2,
+                "balls": 1
+              }
+            ],
+            "packages": [
+              {
+                "inventory_id": 3,
+                "quantity": 1
+              }
+            ]
+          }
+        ],
+        "customer": {
+          "name": "Cliente fictício",
+          "contact": "000000000"
+        },
+        "address": "Rua demonstrativa, 10"
+      }
+    },
+    {
+      "name": "Atualizar para PRONTO_PARA_ENTREGA",
+      "method": "PATCH",
+      "route": "/orders/1/status",
+      "http_status": 200,
+      "request": {
+        "status": "PRONTO_PARA_ENTREGA"
+      },
+      "response": {
+        "id": 1,
+        "canalPedido": "IFOOD",
+        "external_id": "demo-d4cf29f0246940d8b11837674f6a3cb6",
+        "status": "PRONTO_PARA_ENTREGA",
+        "financial_status": "PAGO",
+        "total": "20.00",
+        "created_at": "2026-11-16T04:15:25.720951",
+        "items": [
+          {
+            "id": 1,
+            "balls": 3,
+            "quantity": 1,
+            "unit_price": "20.00",
+            "flavors": [
+              {
+                "inventory_id": 1,
+                "balls": 2
+              },
+              {
+                "inventory_id": 2,
+                "balls": 1
+              }
+            ],
+            "packages": [
+              {
+                "inventory_id": 3,
+                "quantity": 1
+              }
+            ]
+          }
+        ],
+        "customer": {
+          "name": "Cliente fictício",
+          "contact": "000000000"
+        },
+        "address": "Rua demonstrativa, 10"
+      }
+    },
+    {
+      "name": "Atribuir entregador escalado",
+      "method": "POST",
+      "route": "/orders/1/delivery",
+      "http_status": 201,
+      "request": {
+        "driver_id": 2
+      },
+      "response": {
+        "id": 1,
+        "order_id": 1,
+        "driver_id": 2
+      }
+    },
+    {
+      "name": "Cliente ausente e estorno mock",
+      "method": "POST",
+      "route": "/deliveries/1/result",
+      "http_status": 200,
+      "request": {
+        "result": "AUSENTE"
+      },
+      "response": {
+        "id": 1,
+        "result": "AUSENTE",
+        "financial_status": "ESTORNADO",
+        "payment_mode": "mock"
+      }
+    },
+    {
+      "name": "Repetir resultado sem novo estorno",
+      "method": "POST",
+      "route": "/deliveries/1/result",
+      "http_status": 200,
+      "request": {
+        "result": "AUSENTE"
+      },
+      "response": {
+        "id": 1,
+        "result": "AUSENTE",
+        "financial_status": "ESTORNADO",
+        "payment_mode": "mock"
+      }
+    },
+    {
+      "name": "Consultar retorno pendente",
+      "method": "GET",
+      "route": "/donations/items",
+      "http_status": 200,
+      "request": null,
+      "response": [
+        {
+          "id": 1,
+          "order_id": 1,
+          "description": "1 porção(ões) de 3 bola(s): 2 bola(s) de Chocolate, 1 bola(s) de Morango",
+          "status": "AGUARDANDO_RETORNO",
+          "condition": null,
+          "received_at": null
+        }
+      ]
+    },
+    {
+      "name": "Confirmar retorno físico fictício",
+      "method": "POST",
+      "route": "/donations/items/1/return",
+      "http_status": 200,
+      "request": {
+        "suitable": true,
+        "condition": "Condição aprovada apenas para este cenário fictício"
+      },
+      "response": {
+        "id": 1,
+        "status": "DISPONIVEL"
+      }
+    },
+    {
+      "name": "Registrar destinação fictícia à doação",
+      "method": "POST",
+      "route": "/donations",
+      "http_status": 201,
+      "request": {
+        "item_ids": [
+          1
+        ],
+        "destination": "Ação social fictícia - demonstração"
+      },
+      "response": {
+        "id": 1,
+        "item_ids": [
+          1
+        ],
+        "destination": "Ação social fictícia - demonstração",
+        "donated_at": "2026-11-16T04:15:25.825625"
+      }
+    },
+    {
+      "name": "Conferir pedido final",
+      "method": "GET",
+      "route": "/orders/1",
+      "http_status": 200,
+      "request": null,
+      "response": {
+        "id": 1,
+        "canalPedido": "IFOOD",
+        "external_id": "demo-d4cf29f0246940d8b11837674f6a3cb6",
+        "status": "AUSENTE",
+        "financial_status": "ESTORNADO",
+        "total": "20.00",
+        "created_at": "2026-11-16T04:15:25.720951",
+        "items": [
+          {
+            "id": 1,
+            "balls": 3,
+            "quantity": 1,
+            "unit_price": "20.00",
+            "flavors": [
+              {
+                "inventory_id": 1,
+                "balls": 2
+              },
+              {
+                "inventory_id": 2,
+                "balls": 1
+              }
+            ],
+            "packages": [
+              {
+                "inventory_id": 3,
+                "quantity": 1
+              }
+            ]
+          }
+        ],
+        "customer": {
+          "name": "Cliente fictício",
+          "contact": "000000000"
+        },
+        "address": "Rua demonstrativa, 10",
+        "delivery": {
+          "id": 1,
+          "driver_id": 2,
+          "result": "AUSENTE"
+        }
+      }
+    }
+  ],
+  "checks": {
+    "pedido_nao_duplicado": true,
+    "chocolate_baixa_120g": true,
+    "morango_baixa_60g": true,
+    "caixinha_baixa_uma_unidade": true,
+    "cobertura_sem_baixa_automatica": true,
+    "baixa_unica": true,
+    "estorno_mock_unico": true,
+    "pagamento_estornado": true,
+    "retorno_sem_repor_estoque_venda": true,
+    "doacao_ficticia_registrada": true
+  },
+  "note": "Doação fictícia registrada na data da execução; não representa doação física ou agendamento de sexta-feira.",
+  "stock_before": {
+    "Chocolate": {
+      "balance": "1000.000",
+      "unit": "G"
+    },
+    "Morango": {
+      "balance": "1000.000",
+      "unit": "G"
+    },
+    "Caixinha": {
+      "balance": "20.000",
+      "unit": "UN"
+    },
+    "Cobertura": {
+      "balance": "2.000",
+      "unit": "UN"
+    }
+  },
+  "stock_after_payment": {
+    "Chocolate": {
+      "balance": "880.000",
+      "unit": "G"
+    },
+    "Morango": {
+      "balance": "940.000",
+      "unit": "G"
+    },
+    "Caixinha": {
+      "balance": "19.000",
+      "unit": "UN"
+    },
+    "Cobertura": {
+      "balance": "2.000",
+      "unit": "UN"
+    }
+  },
+  "stock_after_donation": {
+    "Chocolate": {
+      "balance": "880.000",
+      "unit": "G"
+    },
+    "Morango": {
+      "balance": "940.000",
+      "unit": "G"
+    },
+    "Caixinha": {
+      "balance": "19.000",
+      "unit": "UN"
+    },
+    "Cobertura": {
+      "balance": "2.000",
+      "unit": "UN"
+    }
+  },
+  "final_state": {
+    "order_id": 1,
+    "order_status": "AUSENTE",
+    "financial_status": "ESTORNADO",
+    "refund_count": 1,
+    "refund_value": "20.00",
+    "stock_movement_count": 3,
+    "donation_status": "DOADO"
+  },
+  "result": "APROVADO"
+}
