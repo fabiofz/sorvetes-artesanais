@@ -16,8 +16,8 @@ def init_db():
 def create_admin():
     username = input('Login do administrador: ').strip()
     name = input('Nome: ').strip()
-    password = getpass('Senha (mínimo de 12 caracteres): ')
-    if len(password) < 12 or len(username) < 3 or not name:
+    password = getpass('Senha (mínimo de 4 caracteres): ')
+    if len(password) < 4 or len(username) < 3 or not name:
         raise SystemExit('Dados inválidos. Nada foi gravado.')
     if getpass('Confirme a senha: ') != password:
         raise SystemExit('As senhas não coincidem.')

@@ -11,7 +11,7 @@ Role = Literal['ADMIN', 'ATENDENTE', 'PRODUCAO', 'ENTREGADOR']
 class NewUser(Input):
     username: str = Field(min_length=3, max_length=80, pattern=r'^[a-zA-Z0-9_.-]+$')
     name: str = Field(min_length=2, max_length=100)
-    password: str = Field(min_length=12, max_length=128)
+    password: str = Field(min_length=4, max_length=128)
     role: Role
     relief: bool = False
 
