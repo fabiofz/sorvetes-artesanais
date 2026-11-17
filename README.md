@@ -19,7 +19,7 @@ Na primeira vez, o script prepara o ambiente Python e instala as dependências. 
 Se o terminal mostrar “Permissão negada”, execute:
 
 ```bash
-chmod +x iniciar.sh criar-banco-local.sh
+chmod +x iniciar.sh criar-banco.sh
 ```
 
 ### Se ainda não tiver o banco
@@ -27,7 +27,7 @@ chmod +x iniciar.sh criar-banco-local.sh
 Execute antes de iniciar o app:
 
 ```bash
-./criar-banco-local.sh
+./criar-banco.sh
 ```
 
 Esse script instala e inicia o MySQL no WSL, cria o banco `segredo_gelado` e salva a conexão no arquivo `.env`. Ele pede a senha do sudo no terminal e não apaga bancos existentes. Se já houver um `.env`, ele preserva o arquivo e interrompe a configuração.
@@ -43,12 +43,6 @@ Com o app rodando, abra [http://localhost:8000/docs](http://localhost:8000/docs)
 Essa página é o Swagger, onde você pode testar a API. Clique em **Authorize** e informe o usuário e a senha que cadastrou. A senha não aparece enquanto é digitada no terminal.
 
 Mantenha o terminal aberto enquanto usa o app. Para encerrar, pressione **Ctrl+C**.
-
-Para conferir apenas a conexão com o banco:
-
-```bash
-./iniciar.sh --verificar
-```
 
 ## O que dá para testar
 
