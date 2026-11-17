@@ -1,162 +1,101 @@
-# Segredo Gelado - Back-end
+# Segredo Gelado - Sorvetes Artesanais
 
-Primeira versão executável do sistema de delivery em **Python + FastAPI + MySQL**, com autenticação **JWT** e senhas com hash Argon2.
+Back-end para organizar os pedidos de uma sorveteria que trabalha só com delivery. O projeto usa Python, FastAPI e MySQL, com login por JWT.
 
-## O que funciona
+A ideia é reunir os pedidos do WhatsApp, telefone, iFood e 99Food em um só lugar, acompanhar as entregas e controlar o estoque. Também é possível cadastrar outros canais, como a Keeta.
 
-- Login e autorização: administrador, atendente, produção e entregador.
-- Pedidos com `canalPedido`: WHATSAPP, TELEFONE, IFOOD, 99FOOD, KEETA e novos canais cadastrados.
-- Opções de 1, 3 e 6 bolas, com preço definido no servidor.
-- Sorvete por sabor: 60 g por bola; embalagens por unidade; coberturas por embalagem com ajuste manual.
-- Pedido direto pendente, pagamento mock aprovado ou negado e baixa transacional do estoque.
-- Pedido simulado de marketplace já pago, com baixa imediata e proteção contra duplicação.
-- Preparação, atribuição a um entregador escalado e conclusão da entrega.
-- Ajuda por acidente ou contestação, disponível para consulta da equipe.
-- Ausente/Não entregue: estorno mock imediato, registro de prejuízo pelo pedido estornado e produto aguardando retorno.
-- Conferência de retorno, segregação do estoque de venda, descarte ou registro de doação.
-- Auditoria das operações sensíveis e erros padronizados sem copiar os dados pessoais recebidos.
+Nesta versão, os pedidos das plataformas, os pagamentos e os estornos são simulados. Não há conexão com serviços externos nem movimentação de dinheiro real.
 
-**Pagamentos, estornos e pedidos externos são simulações. Nenhuma plataforma está conectada e nenhum dinheiro é movimentado.** Cadastrar Keeta ou outro canal não estabelece uma integração real.
+## Como iniciar no WSL
 
-## 1. Preparar o MySQL
+É preciso ter Python 3.12 ou mais recente. Dentro da pasta do projeto, execute:
 
-Requisitos: Python 3.12 e MySQL 8.4. Execute o bloco abaixo no MySQL Workbench conectado como administrador, substituindo a senha antes de executar. O banco e o usuário são exclusivos do projeto.
-
-```sql
-CREATE DATABASE segredo_gelado CHARACTER SET utf8mb4;
-CREATE USER 'segredo'@'localhost' IDENTIFIED BY 'SUBSTITUA_POR_SENHA_FORTE';
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES
-ON segredo_gelado.* TO 'segredo'@'localhost';
+```bash
+./iniciar.sh
 ```
 
-Se já existir um banco com esse nome, escolha outro nome para não misturar os dados. As instruções não exigem remover bancos existentes.
+Na primeira vez, o script prepara o ambiente Python e instala as dependências. Depois, confere o MySQL, cria as tabelas que faltam e pede o cadastro do administrador, caso ainda não exista um.
 
-## 2. Instalar no Windows
+Se o terminal mostrar “Permissão negada”, execute:
 
-Abra o terminal na pasta que contém este README:
-
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt -c constraints-tested.txt
-Copy-Item .env.example .env
-.\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_hex(32))"
+```bash
+chmod +x iniciar.sh criar-banco-local.sh
 ```
 
-Edite `.env` no seu computador. Em `DATABASE_URL`, informe usuário, senha, host, porta e banco do MySQL. Em `JWT_SECRET`, coloque a chave gerada no último comando. Não publique `.env` nem envie suas senhas pelo chat. Se a senha contiver `@`, `:`, `/`, `#` ou `%`, codifique esses caracteres na URL (por exemplo, `@` vira `%40`).
+### Se ainda não tiver o banco
 
-## 3. Criar tabelas e dados iniciais
+Execute antes de iniciar o app:
 
-```powershell
-.\.venv\Scripts\python.exe -m app.cli init-db
-.\.venv\Scripts\python.exe -m app.cli create-admin
-.\.venv\Scripts\python.exe -m app.cli seed-demo
+```bash
+./criar-banco-local.sh
 ```
 
-O administrador é criado interativamente, sem senha padrão. A senha não é exibida. A inicialização cria somente tabelas ausentes; alterações futuras do esquema precisam de uma nova migração. `docs/schema-mysql.sql` contém o esquema inicial equivalente, como referência e alternativa ao comando `init-db`.
+Esse script instala e inicia o MySQL no WSL, cria o banco `segredo_gelado` e salva a conexão no arquivo `.env`. Ele pede a senha do sudo no terminal e não apaga bancos existentes. Se já houver um `.env`, ele preserva o arquivo e interrompe a configuração.
 
-O seed é repetível e não sobrescreve cadastros existentes. Os preços de **R$ 8, R$ 20 e R$ 36 são exemplos**, não preços informados pela empresa. Os estoques começam zerados. Cadastre entradas antes de confirmar vendas.
+Se você já usa outro MySQL, o `iniciar.sh` pede os dados de conexão quando não encontra o `.env`. Nesse caso, o banco precisa estar criado e acessível pelo WSL.
 
-## 4. Executar e usar
+O `.env` guarda a conexão com o banco e a chave JWT. Use `.env.example` como referência e mantenha suas credenciais fora do Git.
 
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+## Como acessar
+
+Com o app rodando, abra [http://localhost:8000/docs](http://localhost:8000/docs).
+
+Essa página é o Swagger, onde você pode testar a API. Clique em **Authorize** e informe o usuário e a senha que cadastrou. A senha não aparece enquanto é digitada no terminal.
+
+Mantenha o terminal aberto enquanto usa o app. Para encerrar, pressione **Ctrl+C**.
+
+Para conferir apenas a conexão com o banco:
+
+```bash
+./iniciar.sh --verificar
 ```
 
-Abra a documentação interativa em `http://127.0.0.1:8000/docs`. Use **Authorize**, com o login e a senha do administrador. O login usa formulário `username` e `password`; o token é enviado como `Authorization: Bearer ...`. Expira em 30 minutos por padrão.
+## O que dá para testar
 
-### Demonstração do fluxo
+- Criar pedidos e consultar por canal de origem.
+- Confirmar ou negar um pagamento simulado.
+- Conferir a baixa do estoque e atualizar o preparo.
+- Atribuir uma entrega a um entregador escalado.
+- Marcar a entrega como entregue, ausente ou não entregue.
+- Pedir ajuda em caso de acidente ou contestação.
+- Registrar o retorno dos produtos e sua destinação para doação.
 
-1. Consulte `GET /catalog/offers` e `GET /inventory` para obter os identificadores.
-2. Use `POST /inventory/{id}/adjustments` para registrar entradas. Exemplo: `{"quantity":1000,"reason":"Entrada demonstrativa"}` para sorvete e 20 unidades para caixinhas.
-3. Crie o pedido pelo exemplo abaixo, substituindo os IDs pelos seus cadastros.
-4. Confirme o pagamento em `POST /orders/{id}/payment/mock`, com `{"approved":true}`. Com `false`, a tentativa é negada, o pedido continua pendente e o estoque permanece igual.
-5. Atualize para `EM_PREPARACAO` e depois `PRONTO_PARA_ENTREGA` em `PATCH /orders/{id}/status`.
-6. Crie os entregadores em `POST /users`, registre a escala do dia em `PUT /shifts` e atribua o pedido em `POST /orders/{id}/delivery`.
-7. Autentique o entregador. Consulte `/deliveries/mine` e utilize as ações de resultado ou ajuda.
+O sorvete é controlado por sabor, considerando cerca de 60 g por bola. Caixinhas e cestinhas são contadas por unidade. As coberturas são controladas por embalagem, com atualização manual quando acabam ou são repostas.
 
-```json
-{
-  "canalPedido": "WHATSAPP",
-  "external_id": "pedido-demo-001",
-  "customer_name": "Cliente fictício",
-  "customer_contact": "000000000",
-  "address": "Rua demonstrativa, 10",
-  "payment_method": "PIX",
-  "already_paid": false,
-  "items": [{
-    "offer_id": 2,
-    "quantity": 1,
-    "flavors": [{"inventory_id": 1, "balls": 3}],
-    "packages": [{"inventory_id": 3, "quantity": 1}]
-  }]
-}
+Pedidos ausentes ou não entregues recebem estorno simulado. Os produtos retornados ficam separados do estoque de venda e só podem ser registrados como doados depois da conferência do retorno.
+
+Os cadastros de exemplo usam preços fictícios e começam com estoque zerado. Antes de vender, registre as entradas em `POST /inventory/{id}/adjustments`.
+
+## Testes
+
+Instale as dependências de teste e execute:
+
+```bash
+.venv/bin/python -m pip install -r requirements-dev.txt -c constraints-tested.txt
+.venv/bin/python -m pytest tests -q
 ```
 
-`flavors[].balls` é a quantidade de bolas desse sabor **por porção**. `items[].quantity` é a quantidade de porções. `packages[].quantity` é o total de embalagens **da linha inteira**. A cobertura não entra nessa baixa automática.
+Por padrão, os testes usam um banco em memória e não alteram o banco do app.
 
-Para simular iFood, use `canalPedido=IFOOD`, `already_paid=true` e `payment_method=PLATAFORMA`. O recebimento no MVP ocorre pelo mesmo endpoint autenticado, sem chamar APIs externas. O preço e o valor total são calculados pelo servidor.
+Para testar pelo Postman, importe [a coleção do projeto](docs/Segredo_Gelado.postman_collection.json), preencha `username` e `password` e execute as requisições em ordem. Use um banco de demonstração, pois a coleção cria cadastros, movimenta estoque e registra pedidos.
 
-O par canal + código externo é único. Repetir exatamente o mesmo pedido retorna o registro existente, sem nova baixa. Dados diferentes com o mesmo código retornam 409. Confirmações de pagamento e resultados de entrega repetidos não repetem a baixa nem o estorno.
+Também há uma demonstração automática com dados fictícios:
 
-### Entregas e doações
-
-- `ENTREGUE`: encerra com sucesso, mantendo o pagamento.
-- `AUSENTE` ou `NAO_ENTREGUE`: encerra sem sucesso, confirma estorno mock integral e gera um registro aguardando retorno físico. Não devolve saldo ao estoque de venda.
-- `POST /deliveries/{id}/help`, tipo `ACIDENTE` ou `CONTESTACAO`: registra ocorrência aberta sem encerrar a entrega. A equipe consulta `/incidents`; envio de push e atendimento da ocorrência ficam para evolução.
-- `POST /donations/items/{id}/return`: confirma o retorno e a condição. Produto adequado fica disponível; inadequado fica descartado.
-- `POST /donations`: registra a destinação. Somente produtos retornados e disponíveis podem ser doados.
-
-As doações de sexta-feira são registradas pela equipe. Não existe tarefa automática que marque um produto como doado sem a destinação física. A escala 5x2 é cadastrada manualmente; o sistema exige que o entregador esteja escalado na data da atribuição, considerada no fuso America/Sao_Paulo.
-
-## 5. Testes
-
-```powershell
-.\.venv\Scripts\python.exe -m pytest tests -q
+```bash
+.venv/bin/python -m app.demo --output docs/demo-resultados.json
 ```
 
-Por padrão, usa um SQLite em memória e não toca no banco configurado em `.env`. Para verificar também no MySQL, crie um **banco descartável cujo nome termine em `_test`**, com usuário autorizado a criar e apagar tabelas:
+Ela usa um banco em memória e percorre o fluxo de pedido, entrega sem sucesso, estorno e doação. Os detalhes estão em [DEMONSTRACAO.md](docs/DEMONSTRACAO.md).
 
-```powershell
-$env:TEST_MYSQL_URL = "mysql+pymysql://usuario:senha@127.0.0.1:3306/segredo_gelado_test?charset=utf8mb4"
-.\.venv\Scripts\python.exe -m pytest tests -q
-Remove-Item Env:TEST_MYSQL_URL
-```
+## Onde encontrar as coisas
 
-Essa modalidade cria e apaga as tabelas no banco de teste. Nunca use o banco da operação. Os cenários estão em `docs/PLANO_DE_TESTES.md`; o resultado verificado no MySQL está em `docs/test-results-mysql.xml`.
+- `app/`: código da API, regras de negócio, login e banco de dados.
+- `tests/`: testes automatizados.
+- [Diagramas](docs/diagramas/README.md): casos de uso, banco e classes.
+- [Plano de testes](docs/PLANO_DE_TESTES.md): cenários e resultados esperados.
+- [Esquema MySQL](docs/schema-mysql.sql): estrutura inicial das tabelas.
+- [OpenAPI](docs/openapi.json): documentação dos endpoints.
 
-Importe `docs/Segredo_Gelado.postman_collection.json` no Postman. Preencha as variáveis `username` e `password` com o administrador do banco demonstrativo e execute a coleção em ordem. Ela cria dados fictícios, registra entradas e executa um pedido; use um banco de demonstração. Não exporte a coleção com sua senha preenchida.
+O projeto ainda é um protótipo. O aplicativo dos entregadores, o painel de atendimento e as integrações reais ficam para as próximas etapas. A escala e as doações de sexta-feira são registradas pela equipe, sem agendamento automático.
 
-## Organização
-
-- `app/models.py`: entidades persistentes e restrições do domínio.
-- `app/schemas.py`: contratos e validações de entrada e saída.
-- `app/services.py`: casos de uso e regras transacionais.
-- `app/db.py`: conexão e unidade de transação.
-- `app/security.py`: hash de senha, emissão e validação JWT, permissões.
-- `app/main.py`: interface HTTP e documentação OpenAPI.
-- `app/cli.py`: esquema inicial, administrador e seed.
-- `tests/`: validação automatizada com banco isolado.
-
-O esquema implementado simplifica a modelagem conceitual: entregadores são usuários com perfil ENTREGADOR; o folguista é identificado por `relief`; sabores e embalagens compartilham a tabela de estoque; os produtos retornados são descritos por pedido em um registro de doação. O histórico de preços e sabores é preservado nos itens do pedido.
-
-## Privacidade e limites desta versão
-
-A finalidade dos dados de cliente é atender e entregar o pedido. O modelo coleta nome, contato e endereço, sem CPF ou dados de cartão. Senhas são armazenadas com Argon2. JWT contém somente identificador do usuário e informações de validade; as permissões atuais são consultadas no banco. Produção não recebe contato ou endereço; entregadores só consultam suas entregas. Auditoria registra IDs e ações, sem copiar os dados pessoais.
-
-Esta versão é um Back-end local, sem aplicativo ou painel visual. HTTPS, proteção contra tentativas excessivas de login, gestão de segredos, backups, política de retenção/exclusão e monitoramento devem ser tratados antes de uso real. Não há integração real com WhatsApp, telefonia, iFood, 99Food, Keeta, gateways, push ou estornos reais. O atendimento telefônico é representado pelo cadastro autenticado do pedido.
-
-## Alinhamento ao roteiro acadêmico
-
-O MVP segue o cenário Segredo Gelado definido na conversa. O roteiro original também exige contexto de rede/unidades, cardápio por unidade, fidelização com consentimento e promoções ao menos conceituais. Esses itens **não estão implementados nem completamente descritos nesta adaptação**; devem ser conciliados com o professor antes de considerar a entrega acadêmica completa. O campo `canalPedido` é representado por um cadastro de canais validado pelo servidor para permitir novas plataformas, em vez de um ENUM fechado; essa diferença também deve ser justificada no relatório.
-
-O repositório está disponível em https://github.com/fabiofz/sorvetes-artesanais. O Swagger pode ser acessado localmente seguindo as instruções deste README; não há deploy público da API.
-
-## Referências técnicas
-
-- [FastAPI - OAuth2 e JWT](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/)
-- [SQLAlchemy - MySQL e MariaDB](https://docs.sqlalchemy.org/en/20/dialects/mysql.html)
-
-
-## Demonstração reproduzível
-
-Execute `python -m app.demo --output docs/demo-resultados.json` após instalar as dependências de desenvolvimento. O padrão é SQLite em memória. Para MySQL, use DEMO_DATABASE_URL apontando para um banco vazio e descartável terminado em `_test`. O comando recusa bancos com tabelas preexistentes e remove o esquema que criou ao terminar. Veja `docs/DEMONSTRACAO.md` e as evidências `docs/demo-resultados-mysql.json` e `docs/demo-resultados-sqlite.json`. Nenhum serviço externo é acionado e não há movimentação financeira real.
+O roteiro acadêmico também pede unidades, fidelização e promoções. Esses pontos ainda precisam ser ajustados nesta adaptação antes da entrega final.
